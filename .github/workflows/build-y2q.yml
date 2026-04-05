@@ -1,6 +1,6 @@
 
 
-name: build not-kernel CI variant
+name: build Astro-Core Kernel For S20 Series
 
 on:
   push:
@@ -55,7 +55,7 @@ jobs:
       - name: Upload ROM Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AstroCore_kernel_${{ matrix.device }}
+          name: Astro-Core_kernel_${{ matrix.device }}
           path: |
             out/*.zip
             *.zip
