@@ -1,17 +1,21 @@
-name: build not-kernel CI variant r8q
+
+name: build not-kernel CI variant
 
 on:
-    push:
-       branches: [ "main" ]
-    workflow_dispatch:
+  push:
+    branches: [ "keep-saved-Silicium" ]
+  workflow_dispatch:
 
 jobs:
   build-kernel:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        device: [y2q]
+
     env:
-      DEVICE: r8q
-      DEVICE_NAME: Galaxy S20 FE
+      DEVICE_NAME: Galaxy S20 Series   # you can adjust per device if needed
       KERNEL_NAME: not_kernel
 
     steps:
@@ -31,9 +35,11 @@ jobs:
       - name: Set Build Start Time
         run: echo "START_TIME=$(date +%s)" >> $GITHUB_ENV
 
+      - name: Make build script executable
+        run: chmod +x build-${{ matrix.device }}.sh
+
       - name: Run build script
-        run: |
-          ./build-r8q.sh
+        run: ./build-${{ matrix.device }}.sh
 
       - name: Set Build End Time
         run: echo "END_TIME=$(date +%s)" >> $GITHUB_ENV
@@ -45,28 +51,10 @@ jobs:
           seconds=$((duration % 60))
           echo "BUILD_DURATION=${minutes}m ${seconds}s" >> $GITHUB_ENV
 
-      - name: Upload to Telegram
-        run: |
-          gitsha1=$(git rev-parse --short HEAD)
-          printf " Localversion: `cat out/include/config/kernel.release`
-           | Clang version: AOSP Clang 18.0.1
-           | Build Date: `date +'%d %B %Y'`
-           | Build commit hash: $gitsha1
-           | KernelSU version: 33333
-           | SELinux: Enforcing" >> buildDetails.txt
-          buildDetails="`cat buildDetails.txt`"
-          zip_file=$(ls not-CI-*.zip)
-          msg="*not\\-kernel* CI build for the *Galaxy S20FE \\(r8q\\)*
-          * *
-          \`\`\`
-          $buildDetails
-          \`\`\`
-          * * "
-          file="$zip_file"
-          curl -s -F document=@$file "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendDocument" \
-          -F chat_id="${{ secrets.TELEGRAM_CHAT_ID }}" \
-          -F "disable_web_page_preview=true" \
-          -F "parse_mode=markdownv2" \
-          -F caption="$msg"
-
-
+      - name: Upload ROM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AstroCore_kernel_${{ matrix.device }}
+          path: |
+            out/*.zip
+            *.zip
