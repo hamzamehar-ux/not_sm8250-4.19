@@ -1,10 +1,10 @@
 
 
-name: build not-kernel CI variant
+name: build Astro_Core Kernel
 
 on:
   push:
-    branches: [ "keep-saved-Silicium" ]
+    branches: [ "Astro_Core" ]
   workflow_dispatch:
 
 jobs:
@@ -55,7 +55,7 @@ jobs:
       - name: Upload ROM Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AstroCore_kernel_${{ matrix.device }}
+          name: Astro_Core_Kernel_${{ matrix.device }}
           path: |
             out/*.zip
             *.zip
